@@ -23,6 +23,8 @@ class Groonga < Formula
 
   option "enable-benchmark", "Enable benchmark program for developer use"
 
+  patch :DATA
+
   def install
     args = %W[
       --prefix=#{prefix}
@@ -41,3 +43,35 @@ class Groonga < Formula
     system "make install"
   end
 end
+
+__END__
+diff --git a/lib/ii.c b/lib/ii.c
+index 8f9f9a8..e82dc7f 100644
+--- a/lib/ii.c
++++ b/lib/ii.c
+@@ -37,6 +37,10 @@
+ # include <oniguruma.h>
+ #endif
+
++#ifndef O_DIRECT
++# define O_DIRECT 0
++#endif
++
+ #define MAX_PSEG                 0x20000
+ #define S_CHUNK                  (1 << GRN_II_W_CHUNK)
+ #define W_SEGMENT                18
+diff --git a/lib/grn.h b/lib/grn.h
+index ab720ef..868133c 100644
+--- a/lib/grn.h
++++ b/lib/grn.h
+@@ -174,6 +174,10 @@ typedef SOCKET grn_sock;
+ #  include <unistd.h>
+ # endif /* HAVE_UNISTD_H */
+
++# ifndef __off64_t_defined
++typedef off_t off64_t;
++# endif
++
+ # ifndef PATH_MAX
+ #  if defined(MAXPATHLEN)
+ #   define PATH_MAX MAXPATHLEN
