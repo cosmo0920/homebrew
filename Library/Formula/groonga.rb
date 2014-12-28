@@ -2,6 +2,7 @@ require "formula"
 
 class Groonga < Formula
   homepage "http://groonga.org/"
+  head "https://github.com/groonga/groonga.git"
   url "http://packages.groonga.org/source/groonga/groonga-4.0.8.tar.gz"
   sha1 "894bf426c79aaab6e3b1f19811db4634aecdc4c2"
 
@@ -13,6 +14,9 @@ class Groonga < Formula
   end
 
   depends_on "pkg-config" => :build
+  depends_on "libtool" => :build if build.head?
+  depends_on "autoconf" => :build if build.head?
+  depends_on "automake" => :build if build.head?
   depends_on "pcre"
   depends_on "msgpack"
   depends_on "mecab" => :optional
@@ -32,7 +36,7 @@ class Groonga < Formula
   # fixed at: https://github.com/groonga/groonga/commit/340085f132c640f03e32a7878f0bd31de9f74eaa
   # issue #264: https://github.com/groonga/groonga/issues/264
   # fixed at: https://github.com/groonga/groonga/commit/91207ecd816e873cdf7070ec7a1c5ae4870f7e6e
-  patch :DATA
+  patch :DATA unless build.head?
 
   def install
     args = %W[
@@ -47,6 +51,8 @@ class Groonga < Formula
     args << "--with-mecab" if build.with? "mecab"
     args << "--with-lz4" if build.with? "lz4"
 
+    system "./version-gen.sh" if build.head?
+    system "./autogen.sh" if build.head?
     # ZeroMQ is an optional dependency that will be auto-detected unless we disable it
     system "./configure", *args
     system "make"
